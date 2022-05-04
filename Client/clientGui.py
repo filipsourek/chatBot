@@ -39,3 +39,9 @@ class TextEditDemo(QWidget):
         def keyPressEvent(self, event):
             if event.key() == Qt.Key_Return:
                 self.btnPress1_Clicked()
+
+if __name__ == '__main__':
+        app = QApplication(sys.argv)
+        win = TextEditDemo()
+        win.show()
+        sys.exit(app.exec_())
