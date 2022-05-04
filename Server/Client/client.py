@@ -23,3 +23,10 @@ class Client:
                 self.client.send(msg_head + msg)     
             except socket.error:
                 self.status = "Disconected"
+    def recv_msg(self):
+        header = self.client.recv(HEADERSIZE)
+        if not len(header):
+            sys.exit()
+        lenght = int(header.decode().strip())
+        msg = self.client.recv(lenght).decode()
+        return(msg)
