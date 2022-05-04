@@ -82,11 +82,6 @@ def test_getResponse_Time():
     b = bot.Bot()
     result = b.getResponse("time")
     assert expected == result
-def test_getResponse_Euro():
-    expected = "5"
-    b = bot.Bot()
-    result = b.getResponse("euro on date 28.4.2022")
-    assert expected == result
 def test_getResponse_Error():
     expected = "I don't understand"
     b = bot.Bot()
