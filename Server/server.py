@@ -17,9 +17,8 @@ server.listen()
 
 b = Bot()
 
-def recv_msg(client):
+def recvMsg(client):
     try:
-        print("AHOJ")
         header = client.recv(HEADERSIZE)
         if not len(header):
             return False
@@ -29,3 +28,21 @@ def recv_msg(client):
         return msg
     except:
         return False
+def sendMsg(client, msg):
+    if msg:
+        msg = msg.encode()
+        header = f"{len(msg):<{HEADERSIZE}}".encode()
+        msg = header + msg
+        client.send(msg)
+        
+def clientThread(client):
+    while True:
+        try:
+            msg = recvMsg(client)
+            if msg is False:
+                break
+            print(msg)
+            response = b.getResponse(msg)
+            sendMsg(client, response)
+        except:
+            break
