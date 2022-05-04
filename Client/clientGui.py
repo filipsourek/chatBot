@@ -26,3 +26,16 @@ class TextEditDemo(QWidget):
                 self.setLayout(layout)
 
                 self.btnPress1.clicked.connect(self.btnPress1_Clicked)
+                
+        def btnPress1_Clicked(self):
+            if(self.input.text() != ""):
+                
+                self.textEdit.append("You: "+ self.input.text())
+                self.network.send_msg(self.input.text())
+                answer = self.network.recv_msg()
+                self.textEdit.append("Bot: "+ answer)
+                self.input.clear()
+        
+        def keyPressEvent(self, event):
+            if event.key() == Qt.Key_Return:
+                self.btnPress1_Clicked()
