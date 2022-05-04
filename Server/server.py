@@ -16,3 +16,16 @@ server.bind(ADDR)
 server.listen()
 
 b = Bot()
+
+def recv_msg(client):
+    try:
+        print("AHOJ")
+        header = client.recv(HEADERSIZE)
+        if not len(header):
+            return False
+        lenght = int(header.decode().strip())
+        msg = client.recv(lenght).decode()
+        print(msg)
+        return msg
+    except:
+        return False
