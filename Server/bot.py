@@ -2,6 +2,8 @@ from datetime import datetime
 import requests
 from dateutil import parser
 import re
+from apscheduler.schedulers.background import BackgroundScheduler
+
 
 URL = "https://www.cnb.cz/cs/financni-trhy/devizovy-trh/kurzy-devizoveho-trhu/kurzy-devizoveho-trhu/denni_kurz.txt"
 HELP_MSG = "List of requests: \n time - returns current time \n name - returns name \n euro - returns current euro rate \n euro 'date' - returns euro on date \n euro all - returns all dates \n help - returns list of requests"
@@ -10,6 +12,11 @@ class Bot:
     def __init__(self):
         self.name = "Eduard"
         self.values = dict()
+        
+        self.scheduler = BackgroundScheduler()
+        self.scheduler.add_job(self.addPrice, 'cron', day_of_week = 'mon-fri', hour=14, minute=31, second=0, timezone='Europe/Prague')
+        self.scheduler.start()
+        self.addPrice()
 
     def getTime(self):
         return datetime.now().strftime("%X")
