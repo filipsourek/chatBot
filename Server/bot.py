@@ -1,8 +1,7 @@
 from datetime import datetime
 import requests
 from dateutil import parser
-
-
+import re
 
 URL = "https://www.cnb.cz/cs/financni-trhy/devizovy-trh/kurzy-devizoveho-trhu/kurzy-devizoveho-trhu/denni_kurz.txt"
 
@@ -43,3 +42,32 @@ class Bot:
         for key in self.values:
             text += key + " EUR/CZK " + self.values[key] + "\n"
         return text
+    
+    def chooseRequestType(self, text):
+        flag = None
+        
+        name_arr = ["name", "nick"]
+        time_arr = ["time", "o'clock", "clock"]
+        euro_arr = ["eur", "euro", "exchange"]
+        help_arr = ["help"]
+        
+        text = text.lower()
+        
+        if re.compile('|'.join(name_arr)).search(text):
+            flag = 1
+        if re.compile('|'.join(time_arr)).search(text):
+            if(flag != None):
+                flag = 0
+                return flag
+            flag = 2
+        if re.compile('|'.join(euro_arr)).search(text):
+            if(flag != None):
+                flag = 0
+                return flag
+            flag = 3
+        if re.compile('|'.join(help_arr)).search(text):
+            if(flag != None):
+                flag = 0
+                return flag
+            flag = 4
+        return flag
