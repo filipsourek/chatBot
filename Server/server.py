@@ -46,3 +46,12 @@ def clientThread(client):
             sendMsg(client, response)
         except:
             break
+def run():
+    while True:
+        client, address = server.accept()
+        
+        thread = threading.Thread(target=clientThread, args=(client,))
+        thread.start()
+
+if __name__ == "__main__":
+    run()
