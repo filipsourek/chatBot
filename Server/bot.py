@@ -4,6 +4,7 @@ from dateutil import parser
 import re
 
 URL = "https://www.cnb.cz/cs/financni-trhy/devizovy-trh/kurzy-devizoveho-trhu/kurzy-devizoveho-trhu/denni_kurz.txt"
+HELP_MSG = "List of requests: \n time - returns current time \n name - returns name \n euro - returns current euro rate \n euro 'date' - returns euro on date \n euro all - returns all dates \n help - returns list of requests"
 
 class Bot:
     def __init__(self):
@@ -71,3 +72,26 @@ class Bot:
                 return flag
             flag = 4
         return flag
+    def getResponse(self, text):
+        req_type = self.chooseRequestType(text)
+        
+        match req_type:
+            case 0:
+                return "I'm not sure which request you want"
+            case 1:
+                return self.getName()
+            case 2:  
+                return self.getTime()
+            case 3:
+                date = self.containsDate(text)
+                if ('date' in text):
+                    if(self.containsDate(text) != None):
+                        return self.getPriceOnDate(date)
+                elif('all' in text):
+                    return self.dictToString()
+                return [*self.values.keys()][-1] + " EUR/CZK = " + self.values[[*self.values.keys()][-1]]  
+            case 4:
+                return HELP_MSG
+            case _:
+                return "I don't understand"
+
