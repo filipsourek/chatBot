@@ -1,6 +1,6 @@
 import socket, sys
 
-IP = "194.233.160.94"
+IP = "18.192.183.9"
 
 PORT = 5555 
 HEADERSIZE = 5
