@@ -58,6 +58,17 @@ class Bot:
             text += "{} EUR/CZK {:.2f}\n".format(key, self.values[key])
         return text
     
+    def euroAvg(self):
+        numOfDates = 3
+        if len(self.values) < numOfDates:
+            return False
+
+        sumVal = 0
+        x = list(self.values.items())
+        for i in range(len(x)-numOfDates, len(x)):
+            sumVal += x[i][1]  
+        return round(sumVal/numOfDates, 3)
+    
     def chooseRequestType(self, text):
         flag = None
         
