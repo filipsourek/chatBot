@@ -16,7 +16,6 @@ class Bot:
         self.scheduler = BackgroundScheduler()
         self.scheduler.add_job(self.addPrice, 'cron', day_of_week = 'mon-fri', hour=14, minute=31, second=0, timezone='Europe/Prague')
         self.scheduler.start()
-        self.addPrice()
 
     def getTime(self):
         return datetime.now().strftime("%X")
@@ -26,18 +25,26 @@ class Bot:
         try:
             site = requests.get(URL).text            
         except requests.exceptions.RequestException as e:
-            raise SystemExit(e)
+            raise  (e)
         date = site.split(" ", 1)[0]
         exchRate = site.partition("EUR|")[2][0:6]
+        exchRate = round(float(exchRate.replace(",",".")), 3)
         return date, exchRate
+    
     def addPrice(self):
-        date, exchRate = self.getEuroData()
-        if(date not in self.values):
-            self.values[date] = exchRate
+        try:
+            date, exchRate = self.getEuroData()
+        except requests.RequestException as e:
+            pass
+        else:
+            if(date not in self.values):
+                self.values[date] = exchRate
+            
     def getPriceOnDate(self, date):
         if(date in self.values):
             return self.values[date]
-        return "This date is not stored"  
+        raise Exception("Date not found")
+     
     def containsDate(self, text):
         try:
             res = parser.parse(text, fuzzy=True, dayfirst=True)
@@ -48,7 +55,7 @@ class Bot:
     def dictToString(self):
         text = ""
         for key in self.values:
-            text += key + " EUR/CZK " + self.values[key] + "\n"
+            text += "{} EUR/CZK {:.2f}\n".format(key, self.values[key])
         return text
     
     def chooseRequestType(self, text):
@@ -90,15 +97,19 @@ class Bot:
             case 2:  
                 return self.getTime()
             case 3:
-                date = self.containsDate(text)
-                if ('date' in text):
-                    if(self.containsDate(text) != None):
-                        return self.getPriceOnDate(date)
-                elif('all' in text):
-                    return self.dictToString()
-                return [*self.values.keys()][-1] + " EUR/CZK = " + self.values[[*self.values.keys()][-1]]  
+                if not len(self.values) == 0:
+                    date = self.containsDate(text)
+                    if ('date' in text):
+                        if(self.containsDate(text) != None):
+                            try:
+                                return self.getPriceOnDate(date)
+                            except Exception as e:
+                                return e
+                    elif('all' in text):
+                        return self.dictToString()
+                    return [*self.values.keys()][-1] + " EUR/CZK = " + str(self.values[[*self.values.keys()][-1]]) 
+                return "I don't have any data"
             case 4:
                 return HELP_MSG
             case _:
                 return "I don't understand"
-
