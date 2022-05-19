@@ -1,6 +1,11 @@
-import bot
-from freezegun import freeze_time
+from unittest import mock
 
+#from requests import RequestException
+import requests
+import bot
+import datetime
+import pytest
+from freezegun import freeze_time
 
 def test_name():
     original = "Give me your name"
@@ -27,8 +32,20 @@ def test_help():
     result = b.chooseRequestType(original)
     assert expected == result
 def test_help():
-    original = "Help me"
-    expected = 4
+    original = "Help me, name"
+    expected = 0
+    b = bot.Bot()
+    result = b.chooseRequestType(original)
+    assert expected == result
+def test_buy():
+    original = "buy"
+    expected = 5
+    b = bot.Bot()
+    result = b.chooseRequestType(original)
+    assert expected == result
+def test_bu2():
+    original = "name, buy"
+    expected = 0
     b = bot.Bot()
     result = b.chooseRequestType(original)
     assert expected == result
@@ -82,6 +99,12 @@ def test_getResponse_Time():
     b = bot.Bot()
     result = b.getResponse("time")
     assert expected == result
+def test_getResponse_Euro():
+    expected = 5
+    b = bot.Bot()
+    b.addEuro("28.04.2022", 5)
+    result = b.getResponse("euro on date 28.4.2022")
+    assert expected == result
 def test_getResponse_Error():
     expected = "I don't understand"
     b = bot.Bot()
@@ -92,4 +115,96 @@ def test_getResponse_Help():
     b = bot.Bot()
     result = b.getResponse("help")
     assert expected == result
+def test_getResponse_BuyError():
+    expected = "Not enough euro data"
+    b = bot.Bot()
+    b.addEuro("28.04.2022", 20)
+    result = b.getResponse("buys")
+    assert expected == result
+def test_getResponse_Buy1():
+    b = bot.Bot()
+    b.addEuro("28.04.2022", 20)
+    b.addEuro("29.04.2022", 19)
+    b.addEuro("30.04.2022", 18)
+    expected = "Buy, euro is lower by {:.2f}".format(20-18)
+
+    result = b.getResponse("buy")
+    assert expected == result
+def test_getResponse_Buy2True():
+    b = bot.Bot()
+    b.addEuro("28.04.2022", 20)
+    b.addEuro("29.04.2022", 21)
+    b.addEuro("30.04.2022", 22)
+    expected = "Buy, euro is higher only by {:.2f} which is less than {:.2f}".format(22-20, round(b.euroAvg()/10, 3))
+
+    result = b.getResponse("buy")
+    assert expected == result
+def test_getResponse_Buy2False():
+    b = bot.Bot()
+    b.addEuro("28.04.2022", 20)
+    b.addEuro("29.04.2022", 21)
+    b.addEuro("30.04.2022", 23)
+    expected = "Don't buy, euro is higher by {:.2f} which is more than {:.2f}".format((23-20), round(b.euroAvg()/10, 3))
+    result = b.getResponse("buy")
+    assert expected == result
+def test_getEuroData():  
+    with mock.patch('requests.get', side_effect=requests.RequestException('Failed Request')) as mock_request_post:
+        b = bot.Bot()
+        with pytest.raises(requests.exceptions.RequestException):
+            b.getEuroData()
+def test_getPriceOnDate():
+    expected = "Date not found"
+    b = bot.Bot()
+    with pytest.raises(Exception):
+        b.getPriceOnDate("1.1.1000")
+def test_euroAvg():
+    b = bot.Bot()
+    b.addEuro("28.04.2022", 20)
+    b.addEuro("29.04.2022", 21)
+    b.addEuro("30.04.2022", 22)
+    result = b.euroAvg()
+    assert 21 == result
+def test_euroAvg_False():
+    b = bot.Bot()
+    b.addEuro("28.04.2022", 20)
+    b.addEuro("29.04.2022", 21)
+    result = b.euroAvg()
+    assert False == result
+def test_recmEuro():
+    b = bot.Bot()
+    b.addEuro("28.04.2022", 20)
+    b.addEuro("29.04.2022", 21)
+    result = b.recmEuro()
+    assert (False, 0, 0) == result
+def test_recmEuro_True():
+    b = bot.Bot()
+    b.addEuro("28.04.2022", 20)
+    b.addEuro("29.04.2022", 19)
+    b.addEuro("30.04.2022", 18)
+    result = b.recmEuro()
+    assert (True, 1, 20-18) == result
+def test_recmEuro_True2():
+    b = bot.Bot()
+    b.addEuro("28.04.2022", 20)
+    b.addEuro("29.04.2022", 21)
+    b.addEuro("30.04.2022", 22)
+    result = b.recmEuro()
+    assert (True, 2, 2) == result
+def test_recmEuro_False2():
+    b = bot.Bot()
+    b.addEuro("28.04.2022", 20)
+    b.addEuro("29.04.2022", 25)
+    b.addEuro("30.04.2022", 28)
+    result = b.recmEuro()
+    assert (False, 2, 8) == result
+def test_getResponse_recm():
+    expected = "Not enough euro data"
+    b = bot.Bot()
+    b.addEuro("28.04.2022", 20)
+    b.addEuro("28.04.2022", 22)
+
+    result = b.getResponse("buy")
+    assert expected == result
+
+
 
