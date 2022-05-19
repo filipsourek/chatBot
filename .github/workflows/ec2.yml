@@ -8,7 +8,6 @@ on:
       - completed  
 
 jobs:
-  on-success:
     deploy:
       name: Deploy to EC2 on master branch push
       runs-on: ubuntu-latest
