@@ -30,7 +30,8 @@ class Bot:
         exchRate = site.partition("EUR|")[2][0:6]
         exchRate = round(float(exchRate.replace(",",".")), 3)
         return date, exchRate
-    
+    def addEuro(self, date, value):
+        self.values[date] = value
     def addPrice(self):
         try:
             date, exchRate = self.getEuroData()
