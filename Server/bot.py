@@ -69,6 +69,22 @@ class Bot:
             sumVal += x[i][1]  
         return round(sumVal/numOfDates, 3)
     
+    def recmEuro(self):
+        P = 10
+        avg = self.euroAvg()
+        if avg == False:
+            return False, 0, 0
+        val3 = [*self.values.values()][-3]
+        val2 = [*self.values.values()][-2]
+        val1 = [*self.values.values()][-1]
+        
+        if val3 > val1:
+            return True, 1, val3 - val1
+        else:
+            if(((val1 - val3)) < avg/P):
+                return True, 2, round((val1 - val3), 3)
+            return False, 2, round(((val1 - val3)), 3)
+        
     def chooseRequestType(self, text):
         flag = None
         
@@ -76,7 +92,8 @@ class Bot:
         time_arr = ["time", "o'clock", "clock"]
         euro_arr = ["eur", "euro", "exchange"]
         help_arr = ["help"]
-        
+        buy_help = ["buy"]
+ 
         text = text.lower()
         
         if re.compile('|'.join(name_arr)).search(text):
@@ -96,6 +113,11 @@ class Bot:
                 flag = 0
                 return flag
             flag = 4
+        if re.compile('|'.join(buy_help)).search(text):
+            if(flag != None):
+                flag = 0
+                return flag
+            flag = 5
         return flag
     def getResponse(self, text):
         req_type = self.chooseRequestType(text)
@@ -122,5 +144,16 @@ class Bot:
                 return "I don't have any data"
             case 4:
                 return HELP_MSG
+            case 5:
+                buy, type, val = self.recmEuro()
+                if type == 0:
+                    return "Not enough euro data"
+                if type == 1:
+                    if buy == True:
+                        return "Buy, euro is lower by {:.2f}".format(val)
+                if type == 2:
+                    if buy == True:
+                        return "Buy, euro is higher only by {:.2f} which is less than {:.2f}".format(val, round(self.euroAvg()/10, 3))
+                    return "Don't buy, euro is higher by {:.2f} which is more than {:.2f}".format(val, round(self.euroAvg()/10, 3))
             case _:
                 return "I don't understand"
