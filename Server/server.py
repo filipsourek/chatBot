@@ -16,6 +16,9 @@ server.bind(ADDR)
 server.listen()
 
 b = Bot()
+b.addEuro("23.05.2022", 24.595)
+b.addEuro("24.05.2022", 24.660)
+b.addEuro("25.05.2022", 24.650)
 
 def recvMsg(client):
     try:
@@ -55,3 +58,4 @@ def run():
 
 if __name__ == "__main__":
     run()
+

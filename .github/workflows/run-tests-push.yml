@@ -43,3 +43,7 @@ jobs:
     - name: Test with pytest
       run: |
         pytest
+    - name: coverage
+      run: |
+        coverage run -m pytest
+        coverage report --fail-under=80    
