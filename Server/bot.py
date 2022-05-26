@@ -158,3 +158,4 @@ class Bot:
                     return "Don't buy, euro is higher by {:.2f} which is more than {:.2f}".format(val, round(self.euroAvg()/10, 3))
             case _:
                 return "I don't understand"
+
